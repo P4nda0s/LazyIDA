@@ -715,11 +715,11 @@ class LazyIDA_t(idaapi.plugin_t):
 
         global ARCH
         global BITS
+        
         ARCH = idaapi.ph_get_id()
-        info = idaapi.get_inf_structure()
-        if info.is_64bit():
+        if idaapi.inf_is_64bit():
             BITS = 64
-        elif info.is_32bit():
+        elif idaapi.inf_is_32bit():
             BITS = 32
         else:
             BITS = 16
