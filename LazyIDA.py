@@ -315,7 +315,11 @@ class hotkey_action_handler_t(idaapi.action_handler_t):
         return 1
 
     def update(self, ctx):
-        if ctx.form_type in (idaapi.BWN_DISASM, idaapi.BWN_DUMP):
+        if idaapi.IDA_SDK_VERSION >= 900:
+            dump_type = idaapi.BWN_HEXVIEW
+        else:
+            dump_type = idaapi.BWN_DUMP
+        if ctx.widget_type in (idaapi.BWN_DISASM, dump_type):
             return idaapi.AST_ENABLE_FOR_WIDGET
         else:
             return idaapi.AST_DISABLE_FOR_WIDGET
@@ -653,8 +657,12 @@ class UI_Hook(idaapi.UI_Hooks):
         idaapi.UI_Hooks.__init__(self)
 
     def finish_populating_widget_popup(self, form, popup):
-        form_type = idaapi.get_widget_type(form)
-        if form_type == idaapi.BWN_DISASM or form_type == idaapi.BWN_DUMP:
+        widget_type = idaapi.get_widget_type(form)
+        if idaapi.IDA_SDK_VERSION >= 900:
+            dump_type = idaapi.BWN_HEXVIEW
+        else:
+            dump_type = idaapi.BWN_DUMP
+        if widget_type == idaapi.BWN_DISASM or widget_type == dump_type:
             idaapi.attach_action_to_popup(form, popup, ACTION_PASTE, None)
             idaapi.attach_action_to_popup(form, popup, ACTION_DUMPER, None)
             idaapi.attach_action_to_popup(form, popup, ACTION_JMP, None)
@@ -666,7 +674,7 @@ class UI_Hook(idaapi.UI_Hooks):
                 for action in ACTION_CONVERT:
                     idaapi.attach_action_to_popup(form, popup, action, "Convert/")
 
-        if form_type == idaapi.BWN_DISASM and (ARCH, BITS) in [(idaapi.PLFM_386, 32),
+        if widget_type == idaapi.BWN_DISASM and (ARCH, BITS) in [(idaapi.PLFM_386, 32),
                                                                (idaapi.PLFM_386, 64),
                                                                (idaapi.PLFM_ARM, 32), ]:
             idaapi.attach_action_to_popup(form, popup, ACTION_SCANVUL, None)
@@ -719,7 +727,7 @@ class LazyIDA_t(idaapi.plugin_t):
         ARCH = idaapi.ph_get_id()
         if idaapi.inf_is_64bit():
             BITS = 64
-        elif idaapi.inf_is_32bit():
+        elif idaapi.inf_is_32bit_or_higher():
             BITS = 32
         else:
             BITS = 16
