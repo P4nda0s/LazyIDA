@@ -316,7 +316,7 @@ class hotkey_action_handler_t(idaapi.action_handler_t):
         return 1
 
     def update(self, ctx):
-        if ctx.form_type in (idaapi.BWN_DISASM, idaapi.BWN_DUMP):
+        if ctx.widget_type in (idaapi.BWN_DISASM, idaapi.BWN_HEXVIEW):
             return idaapi.AST_ENABLE_FOR_WIDGET
         else:
             return idaapi.AST_DISABLE_FOR_WIDGET
