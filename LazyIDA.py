@@ -39,7 +39,33 @@ BITS = 0
 
 history_jmp_base = []
 
+def convertToHex():
+    t0, t1, view = idaapi.twinpos_t(), idaapi.twinpos_t(), idaapi.get_current_viewer()
+    if idaapi.read_selection(view, t0, t1):
+        start, end = t0.place(view).toea(), t1.place(view).toea()
+        size = end - start
+    elif idc.get_item_size(idc.get_screen_ea()) > 1:
+        start = idc.get_screen_ea()
+        size = idc.get_item_size(start)
+        end = start + size
+    else:
+        return False
 
+    data = idc.get_bytes(start, size)
+    if isinstance(data, str):  # python2 compatibility
+        data = bytearray(data)
+    name = idc.get_name(start, idc.GN_VISIBLE)
+    if not name:
+        name = "data"
+    if data:
+        transform_data=""
+        for i in reversed(data):
+            tmp=str(hex(i)).replace("0x","")
+            if len(tmp)==1:
+                tmp="0"+tmp
+            transform_data+=tmp
+        return transform_data
+        
 def dump_bytes(addr, size):
     return idc.get_bytes(addr, size)
 
@@ -312,7 +338,7 @@ class hotkey_action_handler_t(idaapi.action_handler_t):
             # if loc != idaapi.BADADDR:
             #   print("Goto location 0x%x" % loc)
             #   idc.jumpto(loc)
-            jmper_windows(hex_cleaner(clip_text()))
+            jmper_windows(convertToHex())
         return 1
 
     def update(self, ctx):
