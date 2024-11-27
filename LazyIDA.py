@@ -7,6 +7,7 @@ import idautils
 import idc
 import ida_dbg
 import base64
+import ida_ida
 
 from PyQt5 import QtCore
 from PyQt5.Qt import QApplication
@@ -719,10 +720,10 @@ class LazyIDA_t(idaapi.plugin_t):
         ARCH = idaapi.ph_get_id()
         if idaapi.inf_is_64bit():
             BITS = 64
-        elif idaapi.inf_is_32bit():
-            BITS = 32
-        else:
+        elif ida_ida.inf_is_16bit():
             BITS = 16
+        else:
+            BITS = 32
 
         print("LazyIDA (v1.0.0.3) plugin has been loaded.")
 
